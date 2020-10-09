@@ -1,11 +1,12 @@
 class Quadrado {
     heightRatio = 1.5;
-    constructor(seletor, tamanho) {
+    constructor(seletor, tamanho, posicao) {
         this.canvas = document.querySelector(seletor);
         this.informacaoEmX = document.querySelector(".posicaoX");
         this.informacaoEmY = document.querySelector(".posicaoY");
         this.informacaoTamanho = document.querySelector(".tamanho");
         this.animacao = null;
+        this.ehQuadrado = true;
 
         if (this.canvas.getContext) this.contexto = this.canvas.getContext("2d");
 
@@ -16,19 +17,22 @@ class Quadrado {
         this.canvas.height = rect.height;
 
         this.position = {
-            x: 0,
-            y: Math.ceil(this.canvas.height / 2),
+            x: parseInt(this.informacaoEmX.textContent),
+            y: parseInt(this.informacaoEmY.textContent),
         };
         this.informacaoTamanho.textContent = `${this.canvas.width}x${this.canvas.height}`;
     }
     limpaDesenho() {
-        const { x, y } = this.position;
-        this.contexto.clearRect(x, y, this.tamanho, this.tamanho);
+        this.contexto.save();
+        this.contexto.setTransform(1, 0, 0, 1, 0, 0);
+        this.contexto.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.contexto.restore()
     }
     desenha() {
         const { x, y } = this.position;
-
-        this.contexto.fillRect(x, y, this.tamanho, this.tamanho);
+        if (this.ehQuadrado)
+            this.contexto.fillRect(x, y, this.tamanho, this.tamanho);
+        else this.transformaEmEstrela();
     }
     cor(cor) {
         this.limpaDesenho();
@@ -48,12 +52,14 @@ class Quadrado {
     movimentaParaDireita() {
         clearInterval(this.animacao);
         const fps = parseInt(document.querySelector(".sliderFPS").value)
+        const sliderEmX = document.querySelector(".sliderX");
         let counter = 0;
         this.animacao = setInterval(() => {
             const currentInfo = this.canvas.getBoundingClientRect();
             if (counter <= Math.round(currentInfo.width / 2)) {
                 this.limpaDesenho();
                 this.position.x += 1;
+                sliderEmX.value = this.position.x;
                 this.atualizaInformacoes(this.position)
                 this.desenha();
                 counter++;
@@ -98,9 +104,11 @@ class Quadrado {
         this.contexto.stroke();
         this.contexto.fillStyle = "skyblue";
         this.contexto.fill();
+        this.ehQuadrado = false;
     }
     transformaEmEstrela() {
         const { x, y } = this.position;
         this.criarEstrela(x, y, 5, 30, this.tamanho);
     }
 }
+document.querySelector(".autor").textContent = 'Albérico Dias Barreto Filho'
